@@ -74,9 +74,9 @@ def load_config(path: str | Path = "config.json") -> AppConfig:
     if not isinstance(raw, dict):
         raise ConfigError("The top level of config.json must be a JSON object.")
 
-    allowed_marketplaces = {"olx", "bazar"}
+    allowed_marketplaces = {"olx", "bazar", "alo"}
     marketplaces = _nonempty_strings(
-        raw.get("enabled_marketplaces", ["olx", "bazar"]), "enabled_marketplaces"
+        raw.get("enabled_marketplaces", ["bazar", "alo"]), "enabled_marketplaces"
     )
     unknown = sorted(set(marketplaces) - allowed_marketplaces)
     if unknown:
@@ -136,4 +136,3 @@ def load_config(path: str | Path = "config.json") -> AppConfig:
         pages_per_search=pages,
         health_alert_after_failures=health_after,
     )
-

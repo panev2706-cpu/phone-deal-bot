@@ -9,6 +9,8 @@ import unittest
 import requests
 
 from scrapers.base import AccessBlockedError, Listing, RequestFailedError
+from scrapers import build_scrapers
+from scrapers.alo import AloScraper
 from scrapers.bazar import BazarScraper
 from scrapers.olx import OlxScraper
 
@@ -54,6 +56,40 @@ def fixture(name: str) -> str:
 
 
 class RequestPolicyTests(unittest.TestCase):
+    def test_alo_search_uses_query_and_pagination_params_then_deduplicates(self) -> None:
+        session = FakeSession(
+            [
+                FakeResponse(
+                    200,
+                    fixture("alo_search.html"),
+                    url="https://www.alo.bg/obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone",
+                ),
+                FakeResponse(
+                    200,
+                    fixture("alo_search.html"),
+                    url=(
+                        "https://www.alo.bg/obiavi/gsm-komunikacii/"
+                        "mobilni-telefoni-gsm/?q=iphone&page=2"
+                    ),
+                ),
+            ]
+        )
+        scraper = AloScraper(session=session, retries=0, delay_seconds=0)
+
+        results = scraper.search("  iphone 15 pro  ", pages=2)
+
+        self.assertEqual(3, len(results))
+        self.assertEqual(2, len(session.calls))
+        self.assertEqual(scraper.search_url, session.calls[0][0])
+        self.assertEqual({"q": "iphone 15 pro"}, session.calls[0][1])
+        self.assertEqual({"q": "iphone 15 pro", "page": 2}, session.calls[1][1])
+
+    def test_alo_empty_query_does_not_make_a_request(self) -> None:
+        session = FakeSession([])
+        scraper = AloScraper(session=session, retries=0, delay_seconds=0)
+        self.assertEqual([], scraper.search("   "))
+        self.assertEqual([], session.calls)
+
     def test_transient_http_response_is_retried_a_bounded_number(self) -> None:
         session = FakeSession(
             [
@@ -111,8 +147,34 @@ class RequestPolicyTests(unittest.TestCase):
         BazarScraper(session=session)
         self.assertIn("PhoneDealMonitor", session.headers["User-Agent"])
 
+    def test_registry_can_enable_bazar_and_alo_while_olx_is_paused(self) -> None:
+        scrapers = build_scrapers(
+            {"enabled_marketplaces": ["bazar", "alo"]}, session=FakeSession([])
+        )
+        self.assertEqual({"bazar", "alo"}, set(scrapers))
+
 
 class DetailEnrichmentTests(unittest.TestCase):
+    def test_alo_enrichment_adds_description_location_and_image(self) -> None:
+        session = FakeSession(
+            [
+                FakeResponse(
+                    200,
+                    fixture("alo_detail.html"),
+                    url="https://www.alo.bg/iphone-15-pro-11374513",
+                )
+            ]
+        )
+        scraper = AloScraper(session=session, retries=0, delay_seconds=0)
+        original = Listing(
+            "alo", "11374513", "iPhone", "530 €", Decimal("530"), "EUR",
+            "https://www.alo.bg/iphone-15-pro-11374513",
+        )
+        enriched = scraper.enrich(original)
+        self.assertIn("кутия", enriched.description or "")
+        self.assertIn("Бургас", enriched.location or "")
+        self.assertEqual("https://img.alo.bg/detail-iphone.jpg", enriched.image_url)
+
     def test_bazar_enrichment_adds_description_location_and_image(self) -> None:
         session = FakeSession(
             [FakeResponse(200, fixture("bazar_detail.html"), url="https://bazar.bg/obiava-1/x")]
@@ -153,6 +215,15 @@ class DetailEnrichmentTests(unittest.TestCase):
         original = Listing(
             "olx", "abc", "iPhone", "500 EUR", Decimal("500"), "EUR",
             "https://www.olx.bg/d/obyava/x-IDabc.html",
+        )
+        self.assertIs(original, scraper.enrich(original))
+
+    def test_alo_enrichment_network_failure_keeps_original_listing(self) -> None:
+        session = FakeSession([requests.Timeout("offline")])
+        scraper = AloScraper(session=session, retries=0, delay_seconds=0)
+        original = Listing(
+            "alo", "11374513", "iPhone", "530 €", Decimal("530"), "EUR",
+            "https://www.alo.bg/iphone-15-pro-11374513",
         )
         self.assertIs(original, scraper.enrich(original))
 

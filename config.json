@@ -1,7 +1,7 @@
 {
   "enabled_marketplaces": [
-    "olx",
-    "bazar"
+    "bazar",
+    "alo"
   ],
   "exclude_keywords": [
     "case",
@@ -54,4 +54,3 @@
     }
   ]
 }
-

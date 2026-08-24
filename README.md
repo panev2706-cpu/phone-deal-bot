@@ -1,6 +1,8 @@
 # Bulgarian Phone Deal Bot
 
-This free Python bot checks public listings on **OLX.bg** and **Bazar.bg**, remembers what it has already seen, and sends a Telegram alert when a newly found phone is at or below your price limit. It runs in GitHub Actions, so your iPhone and computer can be turned off.
+This free Python bot checks public listings on **Bazar.bg** and **ALO.bg**, remembers what it has already seen, and sends a Telegram alert when a newly found phone is at or below your price limit. It runs in GitHub Actions, so your iPhone and computer can be turned off.
+
+The OLX adapter remains in the project, but OLX is paused in the default configuration because its public pages currently reject automated GitHub Actions requests. Facebook Marketplace is not integrated: Facebook does not provide a supported public search API for ordinary Marketplace listings, and Meta actively restricts unauthorized automated collection. The bot does not use login-cookie scraping, CAPTCHA bypasses, or proxies.
 
 The first run is deliberately quiet: it records the listings that already exist without alerting you. Later runs alert only for new matching listings.
 
@@ -9,7 +11,9 @@ The first run is deliberately quiet: it records the listings that already exist 
 - Keep the GitHub repository **public**. Standard GitHub-hosted runners are free and unlimited for public repositories. A private repository has a limited monthly allowance and therefore is not a reliable €0 choice for a job that runs every five minutes. See [GitHub's runner documentation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job) and [Actions billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 - GitHub Secrets stay hidden, but `config.json` and `seen_listings.json` are public in a public repository. They must never contain your Telegram token, chat ID, phone number, address, or other private information.
 - Five minutes is GitHub's shortest schedule. Runs are **approximately** every five minutes, not guaranteed to start at the exact minute; GitHub can delay or occasionally drop scheduled work during heavy load. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows).
-- OLX access is best-effort. OLX can return HTTP 403, show a challenge, or change its pages. This project does not bypass access controls. OLX's published terms restrict unauthorized automated access and scraping, so review the [OLX terms](https://www.olxgroup.com/terms-of-use-2/) and use the adapter only where you are permitted to do so. Bazar can also change its page without warning.
+- Bazar and ALO can change their public pages without warning. Each has a separate adapter, so a temporary failure on one marketplace does not stop the other.
+- The OLX adapter is retained for future use but disabled by default. OLX can return HTTP 403 or show a challenge, and this project does not bypass those controls. Review the [OLX terms](https://www.olxgroup.com/terms-of-use-2/) before enabling it anywhere you are permitted to do so.
+- Facebook Marketplace is not enabled because there is no supported public API for searching ordinary user listings. Meta describes technical measures against unauthorized automated scraping in its [scraping-protection explanation](https://about.fb.com/news/2021/04/how-we-combat-scraping/).
 - The code, Python libraries, Telegram Bot API, and standard public-repository GitHub Actions runner cost €0. No paid API, server, database, proxy, or AI service is used.
 
 ## Set up everything from an iPhone
@@ -59,7 +63,7 @@ If the response contains `"result":[]`, return to Telegram, send the bot another
 5. Upload every file from this project and keep the same names and folders. Files such as `.github/workflows/monitor.yml` must not be flattened or renamed.
 6. Commit the upload to the default branch (`main`).
 
-On iPhone, GitHub's upload picker may not upload a whole folder. Upload the root files with **Add file → Upload files**. For a nested file, use **Add file → Create new file**, type its full path (for example `scrapers/olx.py`), paste that file's contents, and commit it. Repeat until the repository matches the structure below:
+On iPhone, GitHub's upload picker may not upload a whole folder. Upload the root files with **Add file → Upload files**. For a nested file, use **Add file → Create new file**, type its full path (for example `scrapers/alo.py`), paste that file's contents, and commit it. Repeat until the repository matches the structure below:
 
 ```text
 phone-deal-bot/
@@ -71,18 +75,28 @@ phone-deal-bot/
 │   └── telegram.py
 ├── scrapers/
 │   ├── __init__.py
+│   ├── alo.py
 │   ├── base.py
 │   ├── bazar.py
 │   └── olx.py
 ├── tests/
 │   ├── fixtures/
+│   │   ├── alo_search.html
+│   │   ├── alo_detail.html
+│   │   ├── alo_jsonld.html
+│   │   ├── bazar_detail.html
+│   │   ├── bazar_jsonld.html
 │   │   ├── bazar_search.html
+│   │   ├── olx_ad_link.html
+│   │   ├── olx_detail.html
+│   │   ├── olx_jsonld.html
 │   │   └── olx_search.html
 │   ├── __init__.py
 │   ├── test_config.py
 │   ├── test_main.py
 │   ├── test_prices_filters.py
 │   ├── test_scrapers.py
+│   ├── test_scraper_transport.py
 │   ├── test_state.py
 │   └── test_telegram.py
 ├── utils/
@@ -133,6 +147,7 @@ Example:
 
 ```json
 {
+  "enabled_marketplaces": ["bazar", "alo"],
   "searches": [
     {
       "name": "iPhone 14 Pro Max",
@@ -153,7 +168,7 @@ Example:
 }
 ```
 
-Keep the other settings already present in `config.json`. Add or remove whole search objects as needed, keep commas between objects, and do not add a comma after the last object. The maximum is always configured in EUR; listings written in BGN are converted with exactly `1 EUR = 1.95583 BGN`.
+Keep `"enabled_marketplaces": ["bazar", "alo"]` to monitor Bazar and ALO while OLX remains paused. Keep the other settings already present in `config.json`. Add or remove whole search objects as needed, keep commas between objects, and do not add a comma after the last object. The maximum is always configured in EUR; listings written in BGN are converted with exactly `1 EUR = 1.95583 BGN`.
 
 Edit `exclude_keywords` in the same file to reject accessories, broken phones, replicas, locked devices, or any other unwanted words. Matching is case-insensitive. A listing that matches any exclusion is not sent.
 
@@ -235,9 +250,17 @@ Make sure `.github/workflows/monitor.yml` exists on the default branch, then rel
 - GitHub automatically disables scheduled workflows in a public repository after 60 days with no repository activity. The bot writes a monthly state heartbeat to avoid inactivity where possible, but check the Actions tab occasionally. GitHub explains how to [re-enable a workflow](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows).
 - GitHub can delay or drop an individual scheduled run during very high load. The next run normally catches the listing.
 
-### OLX fails but Bazar works
+### Why OLX is paused
 
-An OLX HTTP 403 or challenge is an access restriction, not a bad Telegram setup. The bot will report repeated marketplace failures and continue checking other enabled marketplaces. It deliberately does not solve CAPTCHAs, imitate a browser, use proxies, or bypass OLX controls. You can remove `"olx"` from `enabled_marketplaces` in `config.json` while leaving Bazar enabled.
+An OLX HTTP 403 or challenge is an access restriction, not a bad Telegram setup. OLX is therefore absent from the default `enabled_marketplaces` list, while its adapter remains in `scrapers/olx.py`. The bot deliberately does not solve CAPTCHAs, imitate a signed-in user, use proxies, or bypass OLX controls. Bazar and ALO continue to run normally.
+
+### Why Facebook Marketplace is not included
+
+Facebook does not offer this personal bot a supported public API for searching ordinary Marketplace listings. Its official integrations are for eligible partners supplying their own inventory, not for reading all user advertisements. Meta also says it detects and blocks unauthorized automated collection. Adding Facebook would require fragile login-session scraping and could expose your account, so it is intentionally not part of this €0 GitHub Actions setup. See Meta's [Marketplace partner information](https://www.facebook.com/help/463983701520800) and [scraping-protection explanation](https://about.fb.com/news/2021/04/how-we-combat-scraping/).
+
+### Bazar or ALO reports a parsing error
+
+A marketplace can temporarily fail or change its page layout. The bot reports repeated failures in Telegram, preserves the last known state, and continues checking the other enabled marketplace. A page-layout change requires an update to that site's separate file under `scrapers/`.
 
 ### No deal alerts after the first run
 
@@ -245,7 +268,7 @@ That is expected until a **new** listing appears. The first run only creates a b
 
 ### A marketplace changed its page
 
-The run log will show which scraper could not parse results. The bot keeps the last state and will not invent listings. Page-layout changes require updating that marketplace's separate file under `scrapers/`; the other marketplace continues independently.
+The run log will show which scraper could not parse results. The bot keeps the last state and will not invent listings. Page-layout changes require updating that marketplace's separate file under `scrapers/`; the other enabled marketplace continues independently.
 
 ## Privacy and delivery notes
 

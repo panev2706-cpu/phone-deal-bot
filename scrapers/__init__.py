@@ -7,6 +7,7 @@ from typing import Any
 
 import requests
 
+from .alo import AloScraper
 from .base import (
     AccessBlockedError,
     BaseScraper,
@@ -56,6 +57,7 @@ def build_scrapers(
     available: dict[str, BaseScraper] = {
         "olx": OlxScraper(session=session, **common),
         "bazar": BazarScraper(session=session, **common),
+        "alo": AloScraper(session=session, **common),
     }
     enabled = config.get("enabled_marketplaces")
     if not isinstance(enabled, (list, tuple, set)):
@@ -77,6 +79,7 @@ def _number(config: Mapping[str, Any], keys: tuple[str, ...], default: float) ->
 
 __all__ = [
     "AccessBlockedError",
+    "AloScraper",
     "BaseScraper",
     "BazarScraper",
     "Listing",

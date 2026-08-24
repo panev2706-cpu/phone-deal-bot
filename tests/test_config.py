@@ -13,7 +13,7 @@ from utils.config import ConfigError, load_config
 
 def valid_config() -> dict:
     return {
-        "enabled_marketplaces": ["olx", "bazar"],
+        "enabled_marketplaces": ["bazar", "alo"],
         "exclude_keywords": ["case", "калъф"],
         "searches": [
             {
@@ -37,7 +37,7 @@ class ConfigTests(unittest.TestCase):
     def test_loads_searches_as_typed_values_and_defaults(self) -> None:
         self.write(valid_config())
         config = load_config(self.path)
-        self.assertEqual(("olx", "bazar"), config.enabled_marketplaces)
+        self.assertEqual(("bazar", "alo"), config.enabled_marketplaces)
         self.assertEqual(("case", "калъф"), config.exclude_keywords)
         self.assertEqual("iPhone 15 Pro", config.searches[0].name)
         self.assertEqual(("iphone 15 pro",), config.searches[0].keywords)
@@ -48,6 +48,12 @@ class ConfigTests(unittest.TestCase):
     def test_shipped_config_is_valid(self) -> None:
         repository_config = Path(__file__).parents[1] / "config.json"
         self.assertTrue(load_config(repository_config).searches)
+
+    def test_defaults_to_bazar_and_alo_when_marketplaces_are_omitted(self) -> None:
+        data = valid_config()
+        del data["enabled_marketplaces"]
+        self.write(data)
+        self.assertEqual(("bazar", "alo"), load_config(self.path).enabled_marketplaces)
 
     def test_invalid_json_reports_line_and_column(self) -> None:
         self.path.write_text('{"searches": [}', encoding="utf-8")
@@ -60,12 +66,12 @@ class ConfigTests(unittest.TestCase):
 
     def test_rejects_unknown_or_duplicate_marketplaces(self) -> None:
         data = valid_config()
-        data["enabled_marketplaces"] = ["olx", "example"]
+        data["enabled_marketplaces"] = ["alo", "example"]
         self.write(data)
         with self.assertRaisesRegex(ConfigError, "Unknown marketplace"):
             load_config(self.path)
 
-        data["enabled_marketplaces"] = ["olx", "olx"]
+        data["enabled_marketplaces"] = ["alo", "alo"]
         self.write(data)
         with self.assertRaisesRegex(ConfigError, "duplicates"):
             load_config(self.path)
