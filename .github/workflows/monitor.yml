@@ -23,9 +23,7 @@ concurrency:
 jobs:
   monitor:
     name: Check marketplaces
-    # OLX currently returns HTTP 403 from the Ubuntu runner. Standard macOS
-    # runners are also free for public repositories and use a separate network.
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
