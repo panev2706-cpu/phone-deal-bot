@@ -1,0 +1,57 @@
+{
+  "enabled_marketplaces": [
+    "olx",
+    "bazar"
+  ],
+  "exclude_keywords": [
+    "case",
+    "калъф",
+    "parts",
+    "части",
+    "replica",
+    "реплика",
+    "broken",
+    "счупен",
+    "icloud",
+    "locked"
+  ],
+  "good_deal_percent": 10,
+  "great_deal_percent": 20,
+  "request_timeout_seconds": 20,
+  "request_retries": 2,
+  "request_delay_seconds": 1.0,
+  "pages_per_search": 1,
+  "health_alert_after_failures": 3,
+  "searches": [
+    {
+      "name": "iPhone 14 Pro Max",
+      "keywords": [
+        "iphone 14 pro max"
+      ],
+      "max_price_eur": 500
+    },
+    {
+      "name": "iPhone 15 Pro",
+      "keywords": [
+        "iphone 15 pro"
+      ],
+      "max_price_eur": 550
+    },
+    {
+      "name": "iPhone 15 Pro Max",
+      "keywords": [
+        "iphone 15 pro max"
+      ],
+      "max_price_eur": 650
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra",
+      "keywords": [
+        "samsung galaxy s24 ultra",
+        "s24 ultra"
+      ],
+      "max_price_eur": 600
+    }
+  ]
+}
+
