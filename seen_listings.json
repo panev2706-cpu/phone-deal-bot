@@ -15,8 +15,8 @@
       "last_error": null
     },
     "olx": {
-      "alerted": false,
-      "consecutive_failures": 2,
+      "alerted": true,
+      "consecutive_failures": 3,
       "last_error": "iPhone 14 Pro Max / \"iphone 14 pro max\": AccessBlockedError: olx: public page access was refused (HTTP 403) | iPhone 15 Pro / \"iphone 15 pro\": AccessBlockedError: olx: public page access was refused (HTTP 403) | iPhone 15 Pro Max / \"iphone 15 pro max\": AccessBlockedError: olx: public page access was refused (HTTP 403) | Samsung Galaxy S24 Ultra / \"samsung galaxy s24 ultra\": AccessBlockedError: olx: public page access was refused (HTTP 403) | Samsung Galaxy S24 Ultra / \"s24 ultra\": AccessBlockedE"
     }
   },
