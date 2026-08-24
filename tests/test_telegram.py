@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from decimal import Decimal
 import unittest
 
@@ -14,6 +15,7 @@ from bot.telegram import (
     build_deal_notification,
 )
 from scrapers.base import Listing
+from utils.config import MarketReference
 from utils.filters import calculate_deal
 
 
@@ -54,6 +56,19 @@ def example_listing(*, image_url: str | None = "https://img.example/phone.jpg") 
 
 
 class NotificationFormattingTests(unittest.TestCase):
+    @staticmethod
+    def market_reference(**overrides) -> MarketReference:
+        values = {
+            "median_price_eur": Decimal("490"),
+            "sample_size": 45,
+            "scope": "mixed storage",
+            "as_of": "2026-08-25",
+            "source": "OLX.bg cleaned asking-price sample",
+            "resale_demand": "very high",
+        }
+        values.update(overrides)
+        return MarketReference(**values)
+
     def test_builds_complete_safe_html_notification(self) -> None:
         deal = calculate_deal(Decimal("398.81"), Decimal("500"))
         self.assertIsNotNone(deal)
@@ -78,6 +93,81 @@ class NotificationFormattingTests(unittest.TestCase):
     def test_notification_round_trip_for_pending_state(self) -> None:
         original = Notification("deal:bazar:1", "<b>deal</b>", "https://img.example/1.jpg")
         self.assertEqual(original, Notification.from_dict(original.to_dict()))
+
+    def test_market_snapshot_compares_bgn_listing_below_median(self) -> None:
+        deal = calculate_deal(Decimal("398.81"), Decimal("500"))
+        assert deal is not None
+        notification = build_deal_notification(
+            example_listing(),
+            "iPhone 15 Pro",
+            Decimal("500"),
+            deal,
+            market_reference=self.market_reference(),
+        )
+
+        self.assertIn("Typical market asking price: <b>€490", notification.text)
+        self.assertIn("<b>€91.19</b> below market (18.6%)", notification.text)
+        self.assertIn("Estimated resale demand: <b>VERY HIGH</b>", notification.text)
+        self.assertIn(
+            "Market snapshot: OLX.bg cleaned asking-price sample; 45 ads; "
+            "mixed storage; as of 2026-08-25",
+            notification.text,
+        )
+
+    def test_market_snapshot_reports_above_and_equal_prices(self) -> None:
+        above_listing = replace(
+            example_listing(),
+            price_text="€525",
+            price_amount=Decimal("525"),
+            currency="EUR",
+        )
+        deal = calculate_deal(Decimal("525"), Decimal("600"))
+        assert deal is not None
+        above = build_deal_notification(
+            above_listing,
+            "iPhone 15 Pro",
+            Decimal("600"),
+            deal,
+            market_reference=self.market_reference(),
+        )
+        self.assertIn("<b>€35</b> above market (7.1%)", above.text)
+
+        equal_listing = replace(
+            example_listing(),
+            price_text="€490",
+            price_amount=Decimal("490"),
+            currency="EUR",
+        )
+        equal_deal = calculate_deal(Decimal("490"), Decimal("600"))
+        assert equal_deal is not None
+        equal = build_deal_notification(
+            equal_listing,
+            "iPhone 15 Pro",
+            Decimal("600"),
+            equal_deal,
+            market_reference=self.market_reference(),
+        )
+        self.assertIn("at the typical market asking price", equal.text)
+
+    def test_market_snapshot_escapes_context_and_uses_singular_ad(self) -> None:
+        listing_value = replace(
+            example_listing(), price_amount=Decimal("450"), currency="EUR"
+        )
+        deal = calculate_deal(Decimal("450"), Decimal("500"))
+        assert deal is not None
+        notification = build_deal_notification(
+            listing_value,
+            "Phone",
+            Decimal("500"),
+            deal,
+            market_reference=self.market_reference(
+                sample_size=1,
+                scope="128GB & unlocked",
+                source="OLX <sample>",
+            ),
+        )
+        self.assertIn("OLX &lt;sample&gt;; 1 ad; 128GB &amp; unlocked", notification.text)
+        self.assertNotIn("OLX <sample>", notification.text)
 
 
 class TelegramTransportTests(unittest.TestCase):

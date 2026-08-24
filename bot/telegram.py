@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import html
 from dataclasses import asdict, dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import TYPE_CHECKING, Any
 
 import requests
 
+from utils.config import MarketReference
 from utils.filters import DealInfo
-from utils.prices import format_money, format_price
+from utils.prices import format_money, format_price, to_eur
 
 if TYPE_CHECKING:
     from scrapers.base import Listing
@@ -48,6 +49,8 @@ def build_deal_notification(
     search_name: str,
     max_price_eur: Decimal,
     deal: DealInfo,
+    *,
+    market_reference: MarketReference | None = None,
 ) -> Notification:
     title = html.escape(_shorten(listing.title, 240))
     phone = html.escape(search_name)
@@ -65,6 +68,7 @@ def build_deal_notification(
     ]
     if location:
         lines.append(f"📍 {location}")
+    lines.extend(_market_reference_lines(listing, market_reference))
     lines.extend(
         [
             f"My maximum: <b>{html.escape(format_money(max_price_eur, 'EUR'))}</b>",
@@ -79,6 +83,51 @@ def build_deal_notification(
         text="\n".join(lines),
         image_url=listing.image_url,
     )
+
+
+def _market_reference_lines(
+    listing: "Listing", reference: MarketReference | None
+) -> list[str]:
+    if reference is None or listing.price_amount is None or not listing.currency:
+        return []
+    try:
+        listing_eur = to_eur(listing.price_amount, listing.currency)
+    except ValueError:
+        return []
+
+    median = reference.median_price_eur
+    difference = (median - listing_eur).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    percent = ((abs(difference) / median) * 100).quantize(
+        Decimal("0.1"), rounding=ROUND_HALF_UP
+    )
+
+    lines = [
+        f"📊 Typical market asking price: "
+        f"<b>{html.escape(format_price(median, 'EUR'))}</b>"
+    ]
+    if difference > 0:
+        lines.append(
+            f"💸 This listing is <b>{html.escape(format_money(difference, 'EUR'))}</b> "
+            f"below market ({percent}%)"
+        )
+    elif difference < 0:
+        lines.append(
+            f"📈 This listing is <b>{html.escape(format_money(abs(difference), 'EUR'))}</b> "
+            f"above market ({percent}%)"
+        )
+    else:
+        lines.append("📊 This listing is at the typical market asking price")
+
+    lines.append(
+        f"📈 Estimated resale demand: <b>{html.escape(reference.resale_demand.upper())}</b>"
+    )
+    ad_word = "ad" if reference.sample_size == 1 else "ads"
+    snapshot = (
+        f"{reference.source}; {reference.sample_size} {ad_word}; "
+        f"{reference.scope}; as of {reference.as_of}"
+    )
+    lines.append(f"🧾 Market snapshot: {html.escape(_shorten(snapshot, 220))}")
+    return lines
 
 
 class TelegramNotifier:

@@ -137,11 +137,15 @@ The workflow itself also requests only `contents: write`; it does not request ac
 
 ### 7. Choose phones and maximum prices
 
-Open `config.json`, tap the pencil icon, and edit only the values under `searches`. Each entry needs:
+The included `config.json` is already adjusted to watch the phone models with the strongest practical resale demand from the market research. Its alert ceilings are deliberately lower than the observed asking-price medians, so the bot focuses on unusually cheap listings instead of ordinary ones.
+
+Open `config.json`, tap the pencil icon, and edit the values under `searches` whenever you want. Each entry uses:
 
 - `name`: the friendly phone name shown in Telegram.
-- `keywords`: one or more alternative search phrases.
-- `max_price_eur`: your maximum price in euros, without the `€` symbol.
+- `keywords`: one or more search phrases. Every phrase creates a marketplace request, so one accurate phrase is normally best.
+- `title_exclude_keywords`: optional model variants that must not appear in the title. For example, the base iPhone 15 search rejects `Pro` and `Plus` titles.
+- `max_price_eur`: the highest listing price that may alert you, without the `€` symbol.
+- `market_reference`: optional dated research shown in the alert. It does not control whether the alert is sent.
 
 Example:
 
@@ -150,27 +154,49 @@ Example:
   "enabled_marketplaces": ["bazar", "alo"],
   "searches": [
     {
-      "name": "iPhone 14 Pro Max",
-      "keywords": ["iphone 14 pro max"],
-      "max_price_eur": 500
-    },
-    {
       "name": "iPhone 15 Pro",
       "keywords": ["iphone 15 pro"],
-      "max_price_eur": 550
-    },
-    {
-      "name": "Samsung Galaxy S24 Ultra",
-      "keywords": ["samsung galaxy s24 ultra", "s24 ultra"],
-      "max_price_eur": 600
+      "title_exclude_keywords": ["pro max"],
+      "max_price_eur": 440,
+      "market_reference": {
+        "median_price_eur": 490,
+        "sample_size": 45,
+        "scope": "mixed storage",
+        "as_of": "2026-08-25",
+        "source": "OLX.bg cleaned active asking-price sample",
+        "resale_demand": "very_high"
+      }
     }
   ]
 }
 ```
 
-Keep `"enabled_marketplaces": ["bazar", "alo"]` to monitor Bazar and ALO while OLX remains paused. Keep the other settings already present in `config.json`. Add or remove whole search objects as needed, keep commas between objects, and do not add a comma after the last object. The maximum is always configured in EUR; listings written in BGN are converted with exactly `1 EUR = 1.95583 BGN`.
+You can omit `market_reference` when adding a phone for which you do not have reliable research; its alerts will simply omit the market-comparison lines. If you include it, `resale_demand` must be `very_high`, `high`, `medium`, or `low`, and `as_of` must use `YYYY-MM-DD`.
 
-Edit `exclude_keywords` in the same file to reject accessories, broken phones, replicas, locked devices, or any other unwanted words. Matching is case-insensitive. A listing that matches any exclusion is not sent.
+The shipped snapshot is:
+
+| Phone search | Alert ceiling | Typical asking-price median | Sample | Demand estimate |
+|---|---:|---:|---:|---|
+| iPhone 13 | €175 | €200 | 26 | Very high |
+| iPhone 13 Pro | €270 | €300 | 28 | High |
+| iPhone 13 Pro Max | €300 | €350 | 38 | High |
+| iPhone 14 | €250 | €280 | 21 | Very high |
+| iPhone 14 Pro | €330 | €374 | 36 | High |
+| iPhone 14 Pro Max | €420 | €430 | 28 | High |
+| iPhone 15 | €320 | €350 | 30 | Very high |
+| iPhone 15 Pro | €440 | €490 | 45 | Very high |
+| iPhone 15 Pro Max | €500 | €599 | 34 | Very high |
+| iPhone 16 | €450 | €499 | 22 | Very high |
+| iPhone 16 Pro | €580 | €615 | 26 | Very high |
+| Galaxy S23 Ultra | €380 | €445 | 32 | High |
+| Galaxy S24 Ultra | €450 | €500 | 35 | High |
+| Galaxy S25 Ultra | €650 | €730 | about 35 | High |
+
+These are cleaned **active asking-price** samples from OLX.bg researched on 25 August 2026, not completed-sale prices. Storage and condition still matter, and the values are a dated snapshot rather than a live price feed. The demand labels are practical resale estimates informed by the sample plus [European refurbished-phone rankings](https://www.recommerce-group.com/de/articles-en/re-index-2025), [European shipment data](https://omdia.tech.informa.com/pr/2026/feb/apple-and-honor-claim-record-market-shares-as-europes-smartphone-shipment-dips-1percent-in-2025), and [Bulgarian active-device share](https://gs.statcounter.com/vendor-market-share/mobile-device/bulgaria). Edit the reference values or remove an outdated `market_reference` block when the market changes.
+
+Keep `"enabled_marketplaces": ["bazar", "alo"]` to monitor Bazar and ALO while OLX remains paused. Add or remove whole search objects as needed, keep commas between objects, and do not add a comma after the last object. The maximum is always configured in EUR; listings written in BGN are converted with exactly `1 EUR = 1.95583 BGN`.
+
+Edit `exclude_title_keywords` for accessory-only titles such as cases, screens, cables, and empty boxes. Edit `exclude_keywords` for serious warnings that may appear anywhere in the title or description, such as broken, replica, MDM, bypass, iCloud lock, cracked glass, or a non-original display. Matching is case-insensitive. Keeping accessory words title-only means a real phone is not rejected merely because its description says a case or charger is included.
 
 Deal labels use the configured percentage below your maximum:
 
@@ -202,7 +228,11 @@ The bot commits changes to `seen_listings.json`, including a periodic heartbeat,
 
 ## What an alert contains
 
-An alert includes the configured phone name, marketplace title, original price, converted EUR price, marketplace, location when available, maximum price, amount saved, and a tappable direct link. When the marketplace supplies an image, the bot tries to send it as a photo. If Telegram cannot download the image, the bot automatically sends the same alert as text instead.
+An alert includes the configured phone name, marketplace title, original and converted price, marketplace, location when available, your alert ceiling, amount saved, and a tappable direct link. When a `market_reference` is configured, it also shows the typical market asking price in EUR and BGN, exactly how far this listing is below or above that median, the estimated resale demand, and how many advertisements were checked in the dated sample.
+
+The market snapshot is context, not a promise of the phone's condition, authenticity, battery health, or eventual resale price. Always inspect and test a phone before paying.
+
+When the marketplace supplies an image, the bot tries to send it as a photo. If Telegram cannot download the image, the bot automatically sends the same alert as text instead.
 
 Listings with no usable numeric price, listings above your limit, and listings containing an excluded word are skipped. Encountered listings are still remembered so changing a limit later does not turn an old advertisement into a “new” one.
 

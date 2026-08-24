@@ -45,9 +45,44 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(Decimal("10"), config.good_deal_percent)
         self.assertEqual(Decimal("20"), config.great_deal_percent)
 
+    def test_loads_title_exclusions_and_typed_market_reference(self) -> None:
+        data = valid_config()
+        data["exclude_title_keywords"] = ["case", "калъф"]
+        data["searches"][0]["title_exclude_keywords"] = ["pro max"]
+        data["searches"][0]["market_reference"] = {
+            "median_price_eur": "490.50",
+            "sample_size": 45,
+            "scope": "mixed storage",
+            "as_of": "2026-08-25",
+            "source": "OLX.bg cleaned asking-price sample",
+            "resale_demand": "very_high",
+        }
+        self.write(data)
+
+        config = load_config(self.path)
+        search = config.searches[0]
+        self.assertEqual(("case", "калъф"), config.exclude_title_keywords)
+        self.assertEqual(("pro max",), search.title_exclude_keywords)
+        self.assertIsNotNone(search.market_reference)
+        reference = search.market_reference
+        assert reference is not None
+        self.assertEqual(Decimal("490.50"), reference.median_price_eur)
+        self.assertEqual(45, reference.sample_size)
+        self.assertEqual("mixed storage", reference.scope)
+        self.assertEqual("2026-08-25", reference.as_of)
+        self.assertEqual("OLX.bg cleaned asking-price sample", reference.source)
+        self.assertEqual("very high", reference.resale_demand)
+
+    def test_market_reference_is_optional(self) -> None:
+        self.write(valid_config())
+        self.assertIsNone(load_config(self.path).searches[0].market_reference)
+
     def test_shipped_config_is_valid(self) -> None:
         repository_config = Path(__file__).parents[1] / "config.json"
-        self.assertTrue(load_config(repository_config).searches)
+        config = load_config(repository_config)
+        self.assertTrue(config.searches)
+        self.assertTrue(config.exclude_title_keywords)
+        self.assertTrue(all(search.market_reference for search in config.searches))
 
     def test_defaults_to_bazar_and_alo_when_marketplaces_are_omitted(self) -> None:
         data = valid_config()
@@ -106,6 +141,49 @@ class ConfigTests(unittest.TestCase):
         self.write(data)
         with self.assertRaisesRegex(ConfigError, "request_retries"):
             load_config(self.path)
+
+    def test_rejects_invalid_title_exclusion_lists(self) -> None:
+        data = valid_config()
+        data["exclude_title_keywords"] = ["case", ""]
+        self.write(data)
+        with self.assertRaisesRegex(ConfigError, "exclude_title_keywords"):
+            load_config(self.path)
+
+        data = valid_config()
+        data["searches"][0]["title_exclude_keywords"] = "pro max"
+        self.write(data)
+        with self.assertRaisesRegex(ConfigError, "title_exclude_keywords"):
+            load_config(self.path)
+
+    def test_rejects_invalid_market_reference_schema(self) -> None:
+        valid_reference = {
+            "median_price_eur": 490,
+            "sample_size": 45,
+            "scope": "mixed storage",
+            "as_of": "2026-08-25",
+            "source": "OLX.bg sample",
+            "resale_demand": "very_high",
+        }
+        cases = (
+            ([], "JSON object"),
+            ({**valid_reference, "median_price_eur": 0}, "greater than zero"),
+            ({**valid_reference, "median_price_eur": "NaN"}, "finite number"),
+            ({**valid_reference, "sample_size": True}, "whole number"),
+            ({**valid_reference, "sample_size": 0}, "whole number"),
+            ({**valid_reference, "sample_size": 100_001}, "whole number"),
+            ({**valid_reference, "scope": "  "}, "scope"),
+            ({**valid_reference, "source": None}, "source"),
+            ({**valid_reference, "as_of": "25/08/2026"}, "YYYY-MM-DD"),
+            ({**valid_reference, "resale_demand": "popular"}, "very_high"),
+        )
+
+        for value, message in cases:
+            with self.subTest(reference=value):
+                data = valid_config()
+                data["searches"][0]["market_reference"] = value
+                self.write(data)
+                with self.assertRaisesRegex(ConfigError, message):
+                    load_config(self.path)
 
 
 if __name__ == "__main__":  # pragma: no cover

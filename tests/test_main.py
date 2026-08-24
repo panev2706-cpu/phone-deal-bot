@@ -237,11 +237,27 @@ class MonitorLifecycleTests(unittest.TestCase):
                 "name": "iPhone 15 Pro",
                 "keywords": ["iphone 15 pro"],
                 "max_price_eur": 600,
+                "market_reference": {
+                    "median_price_eur": 490,
+                    "sample_size": 45,
+                    "scope": "mixed storage",
+                    "as_of": "2026-08-25",
+                    "source": "OLX Pro sample",
+                    "resale_demand": "very_high",
+                },
             },
             {
                 "name": "iPhone 15 Pro Max",
                 "keywords": ["iphone 15 pro max"],
                 "max_price_eur": 650,
+                "market_reference": {
+                    "median_price_eur": 599,
+                    "sample_size": 34,
+                    "scope": "Pro Max mixed storage",
+                    "as_of": "2026-08-25",
+                    "source": "OLX Pro Max sample",
+                    "resale_demand": "high",
+                },
             },
         ]
         self.write_config()
@@ -251,7 +267,82 @@ class MonitorLifecycleTests(unittest.TestCase):
         self.scraper.listings.append(listing("new-max", title="iPhone 15 Pro Max 512GB"))
         self.execute()
         self.assertEqual(1, len(self.notifier.notifications))
-        self.assertIn("iPhone 15 Pro Max", self.notifier.notifications[0].text)
+        text = self.notifier.notifications[0].text
+        self.assertIn("iPhone 15 Pro Max", text)
+        self.assertIn("Typical market asking price: <b>€599", text)
+        self.assertIn("OLX Pro Max sample; 34 ads; Pro Max mixed storage", text)
+        self.assertIn("Estimated resale demand: <b>HIGH</b>", text)
+        self.assertNotIn("OLX Pro sample", text)
+
+    def test_global_title_exclusion_does_not_scan_description(self) -> None:
+        self.config["exclude_keywords"] = []
+        self.config["exclude_title_keywords"] = ["case"]
+        self.write_config()
+        self.scraper.listings = [listing("old")]
+        self.execute()
+
+        self.scraper.listings.extend(
+            [
+                listing("accessory", title="Case for iPhone 15 Pro"),
+                listing(
+                    "phone-with-case",
+                    title="iPhone 15 Pro 256GB",
+                    description="Good phone supplied with a case",
+                ),
+            ]
+        )
+        self.execute()
+
+        self.assertEqual(
+            ["deal:bazar:phone-with-case"],
+            [notification.key for notification in self.notifier.notifications],
+        )
+        state = StateStore(self.state_path)
+        self.assertTrue(state.is_seen("bazar", "accessory"))
+
+    def test_search_title_exclusion_prevents_wrong_variant_notification(self) -> None:
+        self.config["searches"] = [
+            {
+                "name": "iPhone 15",
+                "keywords": ["iphone 15"],
+                "title_exclude_keywords": ["pro", "plus"],
+                "max_price_eur": 500,
+                "market_reference": {
+                    "median_price_eur": 350,
+                    "sample_size": 30,
+                    "scope": "mostly 128GB",
+                    "as_of": "2026-08-25",
+                    "source": "OLX base-model sample",
+                    "resale_demand": "very_high",
+                },
+            }
+        ]
+        self.write_config()
+        self.scraper.listings = [listing("old", title="iPhone 15 128GB")]
+        self.execute()
+
+        self.scraper.listings.append(listing("new-pro", title="iPhone 15 Pro 128GB"))
+        self.execute()
+        self.assertEqual([], self.notifier.notifications)
+        self.assertTrue(StateStore(self.state_path).is_seen("bazar", "new-pro"))
+
+    def test_description_condition_exclusion_still_blocks_phone(self) -> None:
+        self.config["exclude_keywords"] = ["broken"]
+        self.config["exclude_title_keywords"] = []
+        self.write_config()
+        self.scraper.listings = [listing("old")]
+        self.execute()
+
+        self.scraper.listings.append(
+            listing(
+                "broken-detail",
+                title="iPhone 15 Pro 256GB",
+                description="The back glass is broken",
+            )
+        )
+        self.execute()
+        self.assertEqual([], self.notifier.notifications)
+        self.assertEqual(["broken-detail"], self.scraper.enriched)
 
 
 if __name__ == "__main__":  # pragma: no cover

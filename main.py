@@ -31,7 +31,7 @@ class SearchResult:
 
 
 def search_fingerprint(search: SearchConfig) -> str:
-    """Stable identity that is unaffected by name or maximum-price edits."""
+    """Stable identity unaffected by display, filter, or price-context edits."""
 
     normalized = sorted({normalize_text(keyword) for keyword in search.keywords})
     encoded = json.dumps(normalized, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
@@ -78,6 +78,8 @@ def _select_search(listing: Listing, search_results: list[SearchResult], config:
             continue
         specificity = matching_specificity(listing.title, result.search.keywords)
         if specificity < 0:
+            continue
+        if contains_excluded(listing.title, result.search.title_exclude_keywords):
             continue
         if listing.price_amount is None or not listing.currency:
             discount = Decimal("-Infinity")
@@ -162,7 +164,10 @@ def _process_marketplace(
         if card_listing.price_amount is None or not card_listing.currency:
             print(f"[{marketplace}] Skipping {listing_id}: no usable price.")
             continue
-        if contains_excluded(card_listing.title, config.exclude_keywords):
+        if contains_excluded(
+            card_listing.title,
+            config.exclude_keywords + config.exclude_title_keywords,
+        ):
             print(f"[{marketplace}] Excluded by title: {card_listing.title}")
             continue
         try:
@@ -188,7 +193,11 @@ def _process_marketplace(
                 file=sys.stderr,
             )
         searchable_detail = " ".join(part for part in (listing.title, listing.description) if part)
-        if contains_excluded(searchable_detail, config.exclude_keywords):
+        if (
+            contains_excluded(listing.title, config.exclude_title_keywords)
+            or contains_excluded(listing.title, selected.title_exclude_keywords)
+            or contains_excluded(searchable_detail, config.exclude_keywords)
+        ):
             print(f"[{marketplace}] Excluded after detail check: {listing.title}")
             continue
 
@@ -209,7 +218,11 @@ def _process_marketplace(
             continue
 
         notification = build_deal_notification(
-            listing, selected.name, selected.max_price_eur, deal
+            listing,
+            selected.name,
+            selected.max_price_eur,
+            deal,
+            market_reference=selected.market_reference,
         )
         if dry_run:
             print(
