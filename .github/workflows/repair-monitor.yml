@@ -46,8 +46,8 @@ jobs:
 
       - name: Analyze repair-and-resale opportunities
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPAIR_TELEGRAM_BOT_TOKEN: ${{ secrets.REPAIR_TELEGRAM_BOT_TOKEN }}
+          REPAIR_TELEGRAM_CHAT_ID: ${{ secrets.REPAIR_TELEGRAM_CHAT_ID }}
           SEND_TEST: ${{ inputs.send_test }}
         run: |
           args=(--config repair_config.json --state repair_seen_listings.json)

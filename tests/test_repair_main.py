@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import os
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
-from repair_main import run
+from bot.telegram import TelegramError
+from repair_main import _notifier_from_environment, run
 from scrapers.base import Listing
 from tests.repair_helpers import repair_config_data
 from utils.state import StateStore
@@ -128,6 +131,33 @@ class RepairMonitorLifecycleTests(unittest.TestCase):
         self.assertEqual(0, self.execute(send_test=True))
         self.assertEqual(1, len(self.notifier.messages))
         self.assertIn("Repair Flip Bot", self.notifier.messages[0])
+
+
+class RepairTelegramCredentialTests(unittest.TestCase):
+    def test_legacy_deal_bot_secrets_are_not_accepted(self) -> None:
+        legacy_only = {
+            "TELEGRAM_BOT_TOKEN": "ordinary-deal-bot-token",
+            "TELEGRAM_CHAT_ID": "12345",
+        }
+        with patch.dict(os.environ, legacy_only, clear=True):
+            with self.assertRaises(TelegramError) as raised:
+                _notifier_from_environment(timeout=20)
+
+        message = str(raised.exception)
+        self.assertIn("REPAIR_TELEGRAM_BOT_TOKEN", message)
+        self.assertIn("REPAIR_TELEGRAM_CHAT_ID", message)
+
+    def test_repair_bot_uses_only_its_own_secrets(self) -> None:
+        repair_secrets = {
+            "REPAIR_TELEGRAM_BOT_TOKEN": "separate-repair-bot-token",
+            "REPAIR_TELEGRAM_CHAT_ID": "67890",
+        }
+        with patch.dict(os.environ, repair_secrets, clear=True):
+            notifier = _notifier_from_environment(timeout=17)
+
+        self.assertEqual("67890", notifier.chat_id)
+        self.assertEqual(17, notifier.timeout)
+        self.assertTrue(notifier._base_url.endswith("botseparate-repair-bot-token"))
 
 
 if __name__ == "__main__":

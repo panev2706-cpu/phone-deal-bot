@@ -61,13 +61,13 @@ def repair_search_fingerprint(phone: PhoneProfile) -> str:
 
 
 def _notifier_from_environment(timeout: int) -> TelegramNotifier:
-    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    token = os.environ.get("REPAIR_TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.environ.get("REPAIR_TELEGRAM_CHAT_ID", "").strip()
     missing = [
         name
         for name, value in (
-            ("TELEGRAM_BOT_TOKEN", token),
-            ("TELEGRAM_CHAT_ID", chat_id),
+            ("REPAIR_TELEGRAM_BOT_TOKEN", token),
+            ("REPAIR_TELEGRAM_CHAT_ID", chat_id),
         )
         if not value
     ]

@@ -10,7 +10,28 @@ repair_flip/
 .github/workflows/repair-monitor.yml
 ```
 
-It checks the same free public Bazar.bg and ALO.bg pages and uses the same two Telegram GitHub Secrets. It does not need another Telegram bot unless you personally want the alerts in a different chat.
+It checks the same free public Bazar.bg and ALO.bg pages, but sends alerts through a **different Telegram bot**. It never reads the ordinary deal bot's Telegram secrets.
+
+## Create the separate Telegram bot
+
+1. In Telegram, open the verified **@BotFather** account.
+2. Send `/newbot`.
+3. Choose a name such as `Repair Flip Bot`.
+4. Choose a unique username ending in `bot`, for example `panev_repair_flip_bot`.
+5. Copy the new token BotFather gives you. Do not paste it into a public file or chat.
+6. Open the new bot, tap **Start**, and send it `hello`.
+7. In Safari, open `https://api.telegram.org/botYOUR_NEW_TOKEN/getUpdates`, replacing `YOUR_NEW_TOKEN` with the new token.
+8. Copy the number after `"chat":{"id":`. This is normally the same personal chat ID used by your other bot, but save it under the separate secret name below.
+9. Clear that Safari tab/history because the token was present in the address.
+
+In the GitHub repository, open **Settings → Secrets and variables → Actions** and add these two repository secrets:
+
+```text
+REPAIR_TELEGRAM_BOT_TOKEN
+REPAIR_TELEGRAM_CHAT_ID
+```
+
+Paste the new repair bot's token into the first and your numeric chat ID into the second. Leave the original `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` unchanged; those continue to belong only to the ordinary deal bot.
 
 ## What happens every run
 
@@ -54,16 +75,9 @@ In that situation, resale price, profit, and ROI are deliberately left uncalcula
 6. Enable **Send a Repair Flip Bot Telegram setup message** for the first test.
 7. Tap the green **Run workflow** button.
 
-The first run records existing listings without sending old advertisements. Later runs analyze only new listings. The repair workflow runs about every five minutes, staggered two minutes after the ordinary bot.
+The setup message and all later repair alerts come from the new repair bot. The first run records existing listings without sending old advertisements. Later runs analyze only new listings. The repair workflow runs about every five minutes, staggered two minutes after the ordinary bot.
 
-It reuses these existing GitHub Secrets:
-
-```text
-TELEGRAM_BOT_TOKEN
-TELEGRAM_CHAT_ID
-```
-
-No additional secret, API key, database, server, VPS, paid scraper, or AI service is required.
+No paid API, database, server, VPS, paid scraper, or AI service is required.
 
 ## Edit repair costs and decision thresholds
 
