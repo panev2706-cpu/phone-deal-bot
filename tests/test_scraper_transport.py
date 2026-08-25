@@ -90,6 +90,22 @@ class RequestPolicyTests(unittest.TestCase):
         self.assertEqual([], scraper.search("   "))
         self.assertEqual([], session.calls)
 
+    def test_missing_later_search_page_keeps_first_page_results(self) -> None:
+        for scraper_type, fixture_name in (
+            (AloScraper, "alo_search.html"),
+            (BazarScraper, "bazar_search.html"),
+        ):
+            with self.subTest(scraper=scraper_type.__name__):
+                session = FakeSession(
+                    [
+                        FakeResponse(200, fixture(fixture_name)),
+                        FakeResponse(404),
+                    ]
+                )
+                scraper = scraper_type(session=session, retries=0, delay_seconds=0)
+                self.assertTrue(scraper.search("iphone", pages=2))
+                self.assertEqual(2, len(session.calls))
+
     def test_transient_http_response_is_retried_a_bounded_number(self) -> None:
         session = FakeSession(
             [

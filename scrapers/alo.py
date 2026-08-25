@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup, Tag
 from .base import (
     BaseScraper,
     Listing,
+    RequestFailedError,
     ScraperError,
     canonical_url,
     clean_text,
@@ -48,7 +49,12 @@ class AloScraper(BaseScraper):
             params: dict[str, str | int] = {"q": query}
             if page > 1:
                 params["page"] = page
-            response = self._request(self.search_url, params=params)
+            try:
+                response = self._request(self.search_url, params=params)
+            except RequestFailedError as exc:
+                if page > 1 and exc.status_code == 404:
+                    break
+                raise
             for listing in self.parse_search_results(
                 response.text,
                 source_url=response.url,

@@ -2,6 +2,8 @@
 
 This free Python bot checks public listings on **Bazar.bg** and **ALO.bg**, remembers what it has already seen, and sends a Telegram alert when a newly found phone is at or below your price limit. It runs in GitHub Actions, so your iPhone and computer can be turned off.
 
+The repository also contains a completely separate bot for evaluating broken phones for repair and resale. See [Broken Phone Repair Flip Bot](REPAIR_FLIP_README.md). Its configuration, memory file, entry point, and GitHub workflow do not replace this ordinary deal bot.
+
 The OLX adapter remains in the project, but OLX is paused in the default configuration because its public pages currently reject automated GitHub Actions requests. Facebook Marketplace is not integrated: Facebook does not provide a supported public search API for ordinary Marketplace listings, and Meta actively restricts unauthorized automated collection. The bot does not use login-cookie scraping, CAPTCHA bypasses, or proxies.
 
 The first run is deliberately quiet: it records the listings that already exist without alerting you. Later runs alert only for new matching listings.
