@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "iPhone 13 Pro / \"iphone 13 pro\": RequestFailedError: bazar: request failed after 3 attempt(s): HTTPSConnectionPool(host='bazar.bg', port=443): Read timed out. (read timeout=20.0)"
+      "consecutive_failures": 0,
+      "last_error": null
     },
     "olx": {
       "alerted": true,
