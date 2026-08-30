@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "iPhone 13 / \"iphone 13\": RequestFailedError: bazar: HTTP 502 after 3 attempt(s)"
+      "consecutive_failures": 2,
+      "last_error": "iPhone 13 / \"iphone 13\": RequestFailedError: bazar: HTTP 502 after 3 attempt(s) | iPhone 13 Pro / \"iphone 13 pro\": RequestFailedError: bazar: HTTP 502 after 3 attempt(s) | iPhone 13 Pro Max / \"iphone 13 pro max\": RequestFailedError: bazar: HTTP 502 after 3 attempt(s)"
     },
     "olx": {
       "alerted": true,
