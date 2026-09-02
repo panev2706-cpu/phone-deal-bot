@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": false,
-      "consecutive_failures": 0,
-      "last_error": null
+      "consecutive_failures": 1,
+      "last_error": "iPhone 13: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+13&page=2 (Caused by NewConnectionError(\"HTTPSConnection(host='www.alo.bg', port=443): Failed to establish a new connection: [Errno 111] Connection refused\")) | iPhone 13 Pro: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max ret"
     },
     "bazar": {
       "alerted": false,
