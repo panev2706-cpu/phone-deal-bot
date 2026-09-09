@@ -36,9 +36,9 @@
   "last_heartbeat": "2026-08-25T06:31:05.371243+00:00",
   "marketplace_health": {
     "alo": {
-      "alerted": false,
-      "consecutive_failures": 2,
-      "last_error": "iPhone 14: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+14&page=2 (Caused by NewConnectionError(\"HTTPSConnection(host='www.alo.bg', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+      "alerted": true,
+      "consecutive_failures": 3,
+      "last_error": "iPhone 16: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+16&page=2 (Caused by NewConnectionError(\"HTTPSConnection(host='www.alo.bg', port=443): Failed to establish a new connection: [Errno 111] Connection refused\")) | Samsung Galaxy S23 Ultra: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=44"
     },
     "bazar": {
       "alerted": false,
@@ -1254,7 +1254,10 @@
       "56007781",
       "56008009",
       "56008323",
-      "56010284"
+      "56010284",
+      "56010389",
+      "56010392",
+      "56010397"
     ]
   },
   "version": 1
