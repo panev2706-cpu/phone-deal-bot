@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": true,
-      "consecutive_failures": 6,
-      "last_error": "Samsung Galaxy S24 Ultra / \"samsung galaxy s24 ultra\": RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=samsung+galaxy+s24+ultra (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.alo.bg', port=443) at 0x7f33fcd5b3b0>, 'Connection to www.alo.bg timed out. (connect timeout=20.0)'))"
+      "consecutive_failures": 7,
+      "last_error": "iPhone 14 Pro Max / \"iphone 14 pro max\": RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+14+pro+max (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.alo.bg', port=443) at 0x7f379ab949e0>, 'Connection to www.alo.bg timed out. (connect timeout=20.0)'))"
     },
     "bazar": {
       "alerted": false,
@@ -2309,6 +2309,8 @@
       "56008323",
       "56010101",
       "56010198",
+      "56010228",
+      "56010284",
       "9013027"
     ]
   },
