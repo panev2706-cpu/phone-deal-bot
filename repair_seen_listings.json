@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "iPhone 13 Pro: RequestFailedError: bazar: request failed after 3 attempt(s): HTTPSConnectionPool(host='bazar.bg', port=443): Read timed out. (read timeout=20.0)"
+      "consecutive_failures": 0,
+      "last_error": null
     }
   },
   "pending_notifications": [],
@@ -866,6 +866,7 @@
       "55602855",
       "55603241",
       "55603466",
+      "55609643",
       "55610447",
       "55614059",
       "55621978",
