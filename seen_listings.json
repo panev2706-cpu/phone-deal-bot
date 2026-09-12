@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": false,
-      "consecutive_failures": 0,
-      "last_error": null
+      "consecutive_failures": 1,
+      "last_error": "iPhone 15 Pro Max / \"iphone 15 pro max\": RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+15+pro+max (Caused by NewConnectionError(\"HTTPSConnection(host='www.alo.bg', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))"
     },
     "bazar": {
       "alerted": false,
@@ -1441,6 +1441,11 @@
       "54077759",
       "54084533",
       "54090355",
+      "54090596",
+      "54090629",
+      "54090665",
+      "54090695",
+      "54090727",
       "54094602",
       "54094604",
       "54094606",
