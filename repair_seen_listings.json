@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "Samsung Galaxy S23 Ultra: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=s23+ultra&page=2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.alo.bg', port=443) at 0x7f2bbc9d2d20>, 'Connection to www.alo.bg timed out. (connect timeout=20.0)'))"
+      "consecutive_failures": 0,
+      "last_error": null
     },
     "bazar": {
       "alerted": false,
