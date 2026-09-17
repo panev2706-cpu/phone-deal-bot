@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 0,
-      "last_error": null
+      "consecutive_failures": 1,
+      "last_error": "iPhone 15: RequestFailedError: bazar: request failed after 3 attempt(s): HTTPSConnectionPool(host='bazar.bg', port=443): Read timed out. (read timeout=20.0)"
     }
   },
   "pending_notifications": [],
@@ -1560,7 +1560,9 @@
       "56115612",
       "56117649",
       "56118945",
-      "56120176"
+      "56120176",
+      "56120231",
+      "56120256"
     ]
   },
   "version": 1
