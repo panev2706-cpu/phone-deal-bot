@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 0,
-      "last_error": null
+      "consecutive_failures": 1,
+      "last_error": "iPhone 14 / \"iphone 14\": RequestFailedError: bazar: request failed: Response ended prematurely"
     },
     "olx": {
       "alerted": true,
@@ -1766,10 +1766,12 @@
       "54354664",
       "54354709",
       "54356000",
+      "54366461",
       "54367948",
       "54368059",
       "54389137",
       "54396836",
+      "54409665",
       "54421243",
       "54440583",
       "54448387",
