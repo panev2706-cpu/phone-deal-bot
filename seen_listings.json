@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "iPhone 14 / \"iphone 14\": RequestFailedError: bazar: request failed: Response ended prematurely"
+      "consecutive_failures": 0,
+      "last_error": null
     },
     "olx": {
       "alerted": true,
