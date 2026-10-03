@@ -36,8 +36,8 @@
   "last_heartbeat": "2026-09-24T08:47:04.763309+00:00",
   "marketplace_health": {
     "alo": {
-      "alerted": false,
-      "consecutive_failures": 2,
+      "alerted": true,
+      "consecutive_failures": 3,
       "last_error": "Samsung Galaxy S25 Ultra: RequestFailedError: alo: HTTP 410"
     },
     "bazar": {
@@ -2040,7 +2040,10 @@
       "56338661",
       "56340007",
       "56340794",
-      "56340840"
+      "56340840",
+      "56341316",
+      "56341521",
+      "56342098"
     ]
   },
   "version": 1
