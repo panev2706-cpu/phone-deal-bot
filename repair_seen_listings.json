@@ -37,7 +37,7 @@
   "marketplace_health": {
     "alo": {
       "alerted": true,
-      "consecutive_failures": 15,
+      "consecutive_failures": 16,
       "last_error": "Samsung Galaxy S25 Ultra: RequestFailedError: alo: HTTP 410"
     },
     "bazar": {
@@ -2098,7 +2098,10 @@
       "56368724",
       "56369114",
       "56369390",
-      "56370614"
+      "56370614",
+      "56372028",
+      "56372681",
+      "56374364"
     ]
   },
   "version": 1
