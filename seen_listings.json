@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": true,
-      "consecutive_failures": 18,
-      "last_error": "Samsung Galaxy S25 Ultra / \"s25 ultra\": RequestFailedError: alo: HTTP 410"
+      "consecutive_failures": 19,
+      "last_error": "iPhone 13 / \"iphone 13\": RequestFailedError: alo: HTTP 503 after 3 attempt(s) | Samsung Galaxy S25 Ultra / \"s25 ultra\": RequestFailedError: alo: HTTP 410"
     },
     "bazar": {
       "alerted": false,
@@ -4015,6 +4015,7 @@
       "56379688",
       "56380314",
       "56380315",
+      "56380654",
       "9013027"
     ]
   },
