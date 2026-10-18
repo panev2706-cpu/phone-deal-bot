@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "Samsung Galaxy S24 Ultra / \"samsung galaxy s24 ultra\": RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=samsung+galaxy+s24+ultra (Caused by NewConnectionError(\"HTTPSConnection(host='www.alo.bg', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+      "consecutive_failures": 0,
+      "last_error": null
     },
     "bazar": {
       "alerted": false,
@@ -1613,6 +1613,8 @@
       "51104970",
       "51106359",
       "51108179",
+      "51110969",
+      "51111307",
       "51120836",
       "51132976",
       "51136895",
@@ -2747,6 +2749,7 @@
       "55693809",
       "55694094",
       "55694460",
+      "55694740",
       "55695058",
       "55695178",
       "55699730",
@@ -2958,6 +2961,7 @@
       "55848215",
       "55848656",
       "55849049",
+      "55849067",
       "55849775",
       "55849810",
       "55850714",
@@ -4662,6 +4666,10 @@
       "56550122",
       "56550511",
       "56550656",
+      "56551457",
+      "56551758",
+      "56553372",
+      "56553399",
       "9013027"
     ]
   },
