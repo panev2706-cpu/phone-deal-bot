@@ -37,8 +37,8 @@
   "marketplace_health": {
     "alo": {
       "alerted": false,
-      "consecutive_failures": 1,
-      "last_error": "iPhone 13 Pro: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', port=443): Max retries exceeded with url: /obiavi/gsm-komunikacii/mobilni-telefoni-gsm/?q=iphone+13+pro&page=2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.alo.bg', port=443) at 0x7f7794a116a0>, 'Connection to www.alo.bg timed out. (connect timeout=20.0)')) | iPhone 15: RequestFailedError: alo: request failed after 3 attempt(s): HTTPSConnectionPool(host='www.alo.bg', por"
+      "consecutive_failures": 0,
+      "last_error": null
     },
     "bazar": {
       "alerted": false,
@@ -60,6 +60,7 @@
       "10956879",
       "10966851",
       "10989572",
+      "11018808",
       "11047180",
       "11088253",
       "11088273",
@@ -663,6 +664,7 @@
       "51084421",
       "51091700",
       "51108179",
+      "51110969",
       "51120836",
       "51145713",
       "51172877",
@@ -1356,6 +1358,7 @@
       "55847774",
       "55848031",
       "55848215",
+      "55849067",
       "55849810",
       "55850714",
       "55851541",
@@ -2486,7 +2489,11 @@
       "56549801",
       "56550122",
       "56550511",
-      "56550656"
+      "56550656",
+      "56551457",
+      "56551758",
+      "56553372",
+      "56553399"
     ]
   },
   "version": 1
