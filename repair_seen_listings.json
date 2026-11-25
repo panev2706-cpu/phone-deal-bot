@@ -42,8 +42,8 @@
     },
     "bazar": {
       "alerted": false,
-      "consecutive_failures": 0,
-      "last_error": null
+      "consecutive_failures": 1,
+      "last_error": "Samsung Galaxy S23 Ultra: RequestFailedError: bazar: request failed: Response ended prematurely"
     }
   },
   "pending_notifications": [],
@@ -3848,7 +3848,22 @@
       "57077664",
       "57078779",
       "57079581",
-      "57079614"
+      "57079614",
+      "57080074",
+      "57080526",
+      "57080591",
+      "57081910",
+      "57083758",
+      "57083774",
+      "57083948",
+      "57084638",
+      "57084654",
+      "57084997",
+      "57085682",
+      "57085958",
+      "57086082",
+      "57086317",
+      "57086692"
     ]
   },
   "version": 1
